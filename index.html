@@ -631,7 +631,6 @@
     <div class="map-controls">
         <div class="ctrl-btn" id="zoomInBtn"><span class="icon icon-md">add</span></div>
         <div class="ctrl-btn" id="zoomOutBtn"><span class="icon icon-md">remove</span></div>
-        <div class="ctrl-btn" id="myLocationBtn"><span class="icon icon-md">my_location</span></div>
         <div class="ctrl-btn" id="followMeBtn"><span class="icon icon-md">navigation</span></div>
     </div>
 
@@ -1129,7 +1128,6 @@
 
         document.getElementById('zoomInBtn').addEventListener('click', () => map.zoomIn());
         document.getElementById('zoomOutBtn').addEventListener('click', () => map.zoomOut());
-        document.getElementById('myLocationBtn').addEventListener('click', centerOnLocation);
         followBtn.addEventListener('click', toggleFollowMode);
         document.getElementById('startNavBtn').addEventListener('click', startNavigation);
         document.getElementById('stopNavBtn').addEventListener('click', stopNavigation);
