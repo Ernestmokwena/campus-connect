@@ -1053,7 +1053,7 @@
                 .then(geojson => {
                     const stats = buildGraphFromGeoJson(geojson);
                     pathLoaded = true;
-                    drawNetwork();
+                    // drawNetwork(); 
                     networkStatusSpan.innerHTML = `${stats.nodeCount} nodes`;
                     statusDiv.innerHTML = `Network ready · ${stats.nodeCount} nodes`;
                     if (currentLocation && currentDestination) updateAllRoutes();
