@@ -160,7 +160,7 @@ let cachedNodeKeysList = null;
 
 // Load and cache the GeoJSON
 function loadAndCacheGraph() {
-    const geojsonPath = path.join(__dirname, 'files', 'main.geojson');
+    const geojsonPath = path.join(__dirname, 'main.geojson');
     
     try {
         if (fs.existsSync(geojsonPath)) {
