@@ -1,0 +1,10 @@
+const fs = require('fs');
+const vm = require('vm');
+const code = fs.readFileSync('buildings.js', 'utf8');
+const context = {};
+vm.createContext(context);
+vm.runInContext(code, context);
+const campusBuildings = context.campusBuildings;
+const query = 'lab3';
+const matches = campusBuildings.filter(b => b.name.toLowerCase().includes(query.toLowerCase()));
+console.log(matches.map(b => b.name));

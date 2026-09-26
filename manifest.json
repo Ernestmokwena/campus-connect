@@ -1,0 +1,77 @@
+{
+  "name": "Campus Connect Navigator",
+  "short_name": "Campus Connect",
+  "description": "Navigate your campus with ease. Real-time routing and navigation.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#FAF2E5",
+  "background_color": "#FAF2E5",
+  "status_bar": {
+    "background_color": "#FAF2E5"
+  },
+  "icons": [
+    {
+      "src": "https://premiumdesigns.co.za/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://premiumdesigns.co.za/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://premiumdesigns.co.za/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%23FAF2E5' width='540' height='720'/><rect fill='%23FCF6EE' width='540' height='100'/><circle cx='270' cy='360' r='60' fill='%23F2C94C'/></svg>",
+      "sizes": "540x720",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 720'><rect fill='%23FAF2E5' width='1280' height='720'/><rect fill='%23FCF6EE' width='360' height='720'/><circle cx='900' cy='360' r='80' fill='%23F2C94C'/></svg>",
+      "sizes": "1280x720",
+      "type": "image/svg+xml",
+      "form_factor": "wide"
+    }
+  ],
+  "categories": ["navigation", "maps"],
+  "shortcuts": [
+    {
+      "name": "Start Navigation",
+      "short_name": "Navigate",
+      "description": "Start navigating to your destination",
+      "url": "/?mode=navigate",
+      "icons": [
+        {
+          "src": "https://premiumdesigns.co.za/logo.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "View Map",
+      "short_name": "Map",
+      "description": "View the campus map",
+      "url": "/?mode=explore",
+      "icons": [
+        {
+          "src": "https://premiumdesigns.co.za/logo.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
