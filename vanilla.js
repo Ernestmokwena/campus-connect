@@ -20,6 +20,11 @@ let isFetchingRoute = false;
 let currentRouteRequestId = 0;
 let offRouteCounter = 0;
 let isOffRouteFlag = false;
+let lastRouteFingerprint = null;
+let lastRouteRefreshAt = 0;
+let lastRouteOrigin = null;
+const ROUTE_REFRESH_THROTTLE_MS = 30000;
+const ROUTE_MOVE_THRESHOLD_M = 30;
 
 const statusDiv = document.getElementById('gpsText');
 const sheet = document.getElementById('navSheet');
@@ -239,14 +244,60 @@ function enableGPSOrigin() {
     if (currentLocation) updateDepartureDisplay();
 }
 
+function currentRouteSignature(startPoint) {
+    if (!startPoint || !currentDestination) return null;
+    return `${startPoint.lat.toFixed(5)},${startPoint.lng.toFixed(5)}|${currentDestination.lat.toFixed(5)},${currentDestination.lng.toFixed(5)}`;
+}
+
+function shouldRefreshRoute(startPoint, forceReroute = false) {
+    if (!currentDestination || !startPoint) return false;
+    if (forceReroute) return true;
+
+    const nextSignature = currentRouteSignature(startPoint);
+    if (!nextSignature) return false;
+
+    const distanceFromLastOrigin = lastRouteOrigin
+        ? haversine(lastRouteOrigin.lat, lastRouteOrigin.lng, startPoint.lat, startPoint.lng)
+        : Infinity;
+
+    const sameRoute = lastRouteFingerprint === nextSignature;
+
+    if (sameRoute) {
+        if (!isNavigating) return false;
+        if (distanceFromLastOrigin < ROUTE_MOVE_THRESHOLD_M) return false;
+        return true;
+    }
+
+    if (distanceFromLastOrigin < ROUTE_MOVE_THRESHOLD_M * 0.6) {
+        return false;
+    }
+
+    if (Date.now() - lastRouteRefreshAt < ROUTE_REFRESH_THROTTLE_MS) {
+        return false;
+    }
+
+    return true;
+}
+
+function markRouteRefreshed(startPoint) {
+    const nextSignature = currentRouteSignature(startPoint);
+    if (nextSignature) {
+        lastRouteFingerprint = nextSignature;
+        lastRouteRefreshAt = Date.now();
+        lastRouteOrigin = { lat: startPoint.lat, lng: startPoint.lng };
+    }
+}
+
 function fetchRoute(forceReroute = false, startPoint = null) {
     if (!currentDestination) return;
     const routeStart = startPoint || currentLocation;
     if (!routeStart) return;
     if (isFetchingRoute) return;
+    if (!forceReroute && !shouldRefreshRoute(routeStart, false)) return;
 
     isFetchingRoute = true;
     const thisRequestId = ++currentRouteRequestId;
+    markRouteRefreshed(routeStart);
 
     //KILL MEMORY: Clear all route layers immediately to stop visual bleed
     clearRouteLayer();
@@ -401,28 +452,6 @@ dashRanges.forEach((range, index) => {
 }
 
 function drawSolidRoute(path, forceReroute, distance) {
-    const solidCoords = path.map(p => [p[1], p[0]]);
-    if (solidCoords.length > 1) {
-        map.addSource('route-solid', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'LineString', coordinates: solidCoords } } });
-        map.addLayer({ id: 'route-solid', type: 'line', source: 'route-solid', layout: { 'line-join': 'round', 'line-cap': 'round' }, paint: { 'line-color': forceReroute ? '#F59E0B' : '#C8F135', 'line-width': 6, 'line-opacity': 0.95 } });
-    }
-    updateMetrics(distance);
-}
-
-// Helper function to draw solid path
-function drawSolidRoute(path, forceReroute, distance) {
-    console.log("Drawing solid route only.");
-    const solidCoords = path.map(p => [p[1], p[0]]);
-    if (solidCoords.length > 1) {
-        map.addSource('route-solid', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'LineString', coordinates: solidCoords } } });
-        map.addLayer({ id: 'route-solid', type: 'line', source: 'route-solid', layout: { 'line-join': 'round', 'line-cap': 'round' }, paint: { 'line-color': forceReroute ? '#F59E0B' : '#C8F135', 'line-width': 6, 'line-opacity': 0.95 } });
-    }
-    updateMetrics(distance);
-}
-
-// Helper function to draw solid path
-function drawSolidRoute(path, forceReroute, distance) {
-    console.log("Drawing solid route only.");
     const solidCoords = path.map(p => [p[1], p[0]]);
     if (solidCoords.length > 1) {
         map.addSource('route-solid', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'LineString', coordinates: solidCoords } } });
@@ -1019,7 +1048,9 @@ function checkNetworkStatus() {
                 statusDiv.classList.remove('loading');
                 statusDiv.textContent = 'Ready';
                 document.getElementById('gpsLed').classList.add('live');
-                if (currentLocation && currentDestination && !isNavigating) fetchRoute(false, currentLocation);
+                if (currentLocation && currentDestination && !isNavigating && shouldRefreshRoute(currentLocation, false)) {
+                    fetchRoute(false, currentLocation);
+                }
             } else {
                 statusDiv.textContent = 'Loading campus data…';
                 statusDiv.classList.add('loading');
@@ -1106,7 +1137,7 @@ function applyGpsUpdate(newLoc, heading) {
         userMarker.setLngLat([newLoc.lng, newLoc.lat]);
         updateBearingMarker();
 
-        if (currentDestination) {
+        if (currentDestination && shouldRefreshRoute(currentLocation, false)) {
             fetchRoute(false, currentLocation);
             const dist = haversine(
                 currentLocation.lat, currentLocation.lng,
@@ -1143,7 +1174,7 @@ function applyGpsUpdate(newLoc, heading) {
     }
     updateBearingMarker();
 
-    if (currentDestination && !isNavigating) {
+    if (currentDestination && !isNavigating && shouldRefreshRoute(currentLocation, false)) {
         fetchRoute(false, currentLocation);
         const dist = haversine(
             currentLocation.lat, currentLocation.lng,
@@ -1153,7 +1184,7 @@ function applyGpsUpdate(newLoc, heading) {
         return;
     }
 
-    if (currentDestination && isNavigating) {
+    if (currentDestination && isNavigating && shouldRefreshRoute(currentLocation, false)) {
         const remainingDist = haversine(
             currentLocation.lat, currentLocation.lng,
             currentDestination.lat, currentDestination.lng
