@@ -159,6 +159,15 @@ function clearRouteLayer() {
     });
 }
 
+function resetRouteTracking() {
+    currentRouteRequestId += 1;
+    isFetchingRoute = false;
+    lastRouteFingerprint = null;
+    lastRouteRefreshAt = 0;
+    lastRouteOrigin = null;
+    clearRouteLayer();
+}
+
 function updateMetrics(distance) {
     if (!distance && distance !== 0) return;
     const time = currentMode === "walk" ? distance / (1.4 * 60) : distance / (8 * 60);
@@ -812,7 +821,7 @@ async function loadBoundaryOverlay() {
 }
 
 function setDestination(dest) {
-    clearRouteLayer();
+    resetRouteTracking();
     offRouteCounter = 0;
     isOffRouteFlag = false;
 
@@ -850,7 +859,7 @@ function syncTripButtons() {
 }
 
 function clearDestination() {
-    clearRouteLayer();
+    resetRouteTracking();
     offRouteCounter = 0;
     isOffRouteFlag = false;
 
