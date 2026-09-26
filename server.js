@@ -388,7 +388,7 @@ let cachedNodeKeysList = null;
 let cachedGeojson = null;
 
 function loadAndCacheGraph() {
-    const geojsonPath = 'etc/secrets/main.geojson';
+    const geojsonPath = '/etc/secrets/main.geojson';
     
     try {
         if (fs.existsSync(geojsonPath)) {
@@ -559,7 +559,7 @@ app.get('/api/route', (req, res) => {
 });
 
 app.get('/api/network-data', (req, res) => {
-    const geojsonPath = 'etc/secrets/main.geojson';
+    const geojsonPath = '/etc/secrets/main.geojson';
     try {
         if (!fs.existsSync(geojsonPath)) {
             return res.status(404).json({ error: 'Network file not found' });
